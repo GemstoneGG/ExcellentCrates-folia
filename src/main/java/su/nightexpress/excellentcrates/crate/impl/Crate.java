@@ -34,7 +34,6 @@ import su.nightexpress.excellentcrates.util.pos.WorldPos;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.bridge.item.AdaptedItem;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.universalscheduler.foliaScheduler.FoliaScheduler;
 import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 import su.nightexpress.nightcore.manager.ConfigBacked;
 import su.nightexpress.nightcore.util.FileUtil;
@@ -222,10 +221,13 @@ public class Crate implements ConfigBacked {
 
         this.blockPositions.addAll(config.getStringList("Block.Positions").stream().map(WorldPos::deserialize).toList());
         if (!Config.isCrateInAirBlocksAllowed()) {
-            new FoliaScheduler(plugin).runTask(() -> {
-                List<WorldPos> blockPositionsTemp = new ArrayList<>(blockPositions);
+            this.plugin.runTask(() -> {
+                List<WorldPos> blockPositionsTemp = new ArrayList<>(this.blockPositions);
                 for (WorldPos pos : blockPositionsTemp) {
-                    new FoliaScheduler(plugin).runTask(pos.toLocation(), () -> {
+                    Location location = pos.toLocation();
+                    if (location == null) continue;
+
+                    this.plugin.runTask(location, () -> {
                         Block block = pos.toBlock();
 
                         if (block == null || block.isEmpty())
