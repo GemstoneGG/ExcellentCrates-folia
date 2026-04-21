@@ -34,7 +34,7 @@ public class DataManager extends AbstractManager<CratesPlugin> {
 
     @Override
     protected void onLoad() {
-        this.plugin.runTaskAsync(() -> this.loadData());
+        this.plugin.runTaskAsync(this::loadData);
 
         this.addAsyncTask(this::saveCrateDatas, Config.DATA_CRATE_DATA_SAVE_INTERVAL.get());
         this.addAsyncTask(this::saveRewardLimits, Config.DATA_REWARD_LIMITS_SAVE_INTERVAL.get());
@@ -61,7 +61,6 @@ public class DataManager extends AbstractManager<CratesPlugin> {
         if (dataSet.isEmpty()) return;
 
         this.plugin.getDataHandler().updateCrateDatas(dataSet);
-        //this.plugin.debug("Saved " + dataSet.size() + " crate datas.");
     }
 
     public void saveRewardLimits() {
@@ -72,7 +71,6 @@ public class DataManager extends AbstractManager<CratesPlugin> {
         if (limits.isEmpty()) return;
 
         this.plugin.getDataHandler().updateRewardLimits(limits);
-        //this.plugin.debug("Saved " + limits.size() + " reward limits.");
     }
 
     public void loadData() {
@@ -88,19 +86,13 @@ public class DataManager extends AbstractManager<CratesPlugin> {
         this.plugin.getDataHandler().loadCrateDatas().forEach(data -> {
             this.crateDataMap.put(data.getCrateId(), data);
         });
-
-        //this.plugin.debug("Loaded " + this.crateDataMap.size() + " crate datas.");
     }
 
     public void loadRewardLimits() {
         this.rewardLimitMap.clear();
 
         this.plugin.getDataHandler().loadRewardLimits().forEach(this::addRewardLimit);
-
-        //this.plugin.debug("Loaded " + this.rewardLimitMap.size() + " reward limit datas.");
     }
-
-
 
     public void handleSynchronization() {
         if (!this.isDataLoaded()) return;
@@ -127,8 +119,6 @@ public class DataManager extends AbstractManager<CratesPlugin> {
             this.deleteRewardLimits(reward);
         }
     }
-
-
 
     public boolean isDataLoaded() {
         return this.dataLoaded;
@@ -159,8 +149,6 @@ public class DataManager extends AbstractManager<CratesPlugin> {
         this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().deleteCrateData(crate));
         this.crateDataMap.remove(crate.getId());
     }
-
-
 
     @NotNull
     public RewardData getRewardLimitOrCreate(@NotNull Reward reward, @Nullable Player player) {
